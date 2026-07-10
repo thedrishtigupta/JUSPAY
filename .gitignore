@@ -1,0 +1,10 @@
+# Ignore all output folders
+**/output/
+
+# Ignore compiled binaries
+*.exe
+*.out
+*.o
+
+.vscode/
+
