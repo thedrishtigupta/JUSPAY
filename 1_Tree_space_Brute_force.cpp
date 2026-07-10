@@ -21,7 +21,7 @@ class LockingTree{
     Node* root;
     unordered_map<string, Node*> mp;
 
-    bool hasLockedAncestor(Node* node) {
+    bool hasLockedAncestor(Node* node) { // TC : O(n)
         Node* curr = node->parent;
 
         while(curr) {
@@ -32,7 +32,7 @@ class LockingTree{
         return false;
     }
 
-    bool hasLockedDesc(Node* node) {
+    bool hasLockedDesc(Node* node) { // O(h)
         for(Node* ch : node->children) {
             if(ch->isLocked) return true;
             if(hasLockedDesc(ch)) return true;
@@ -40,7 +40,7 @@ class LockingTree{
         return false;
     }
 
-    void getLockedDesc(Node* node, vector<Node*>& lockedNodes) {
+    void getLockedDesc(Node* node, vector<Node*>& lockedNodes) { // sc = O(n), tc = O(n)
         for(Node* ch : node->children) {
             if(ch->isLocked) lockedNodes.push_back(ch);
             getLockedDesc(ch, lockedNodes);
@@ -54,7 +54,7 @@ class LockingTree{
         mp[name] = root;
     }
 
-    void buildTree(vector<string>& nodes, int m) {
+    void buildTree(vector<string>& nodes, int m) { // tc = O(n), sc = O(n) -> every node created, pushed, popped once
         queue<Node*> q;
         q.push(root);
 
@@ -71,44 +71,44 @@ class LockingTree{
             }
         }
     }
-    bool lock(string name, int uid) {
+    bool lock(string name, int uid) { // O(logmN + N) = O(N)
         Node* node = mp[name];
 
-        if(node->isLocked) return false;
-        if(hasLockedancestor(node)) return false;
-        if(hasLockedDesc(node)) return false;
+        if(node->isLocked) return false; // O(1)
+        if(hasLockedancestor(node)) return false; // O(h)
+        if(hasLockedDesc(node)) return false; // O(n) if node = 0, check every node
 
         node->isLocked = true;
         node->lockedBy = uid;
         return true;
     }
 
-    bool unlock(string name, int uid) {
+    bool unlock(string name, int uid) { // O(1)
         Node* node = mp[name];
-        if(!node->isLocked) return false;
-        if(node->lockedBy != uid) return false;
+        if(!node->isLocked) return false; // O(1)
+        if(node->lockedBy != uid) return false; // O(1)
 
         node->isLocked = false;
         node->lockedBy = -1;
         return true;
     }
 
-    bool upgrade(string name, int uid) {
+    bool upgrade(string name, int uid) { // O(N)
         Node* node = mp[name];
 
-        if(node->isLocked) return false;
-        if(hasLockedAncestors(node)) return false;
+        if(node->isLocked) return false; // O(1)
+        if(hasLockedAncestors(node)) return false; // O(h)
 
-        vector<Node*> lockedNodes;
-        getLockedDesc(node, lockedNodes);
+        vector<Node*> lockedNodes; // sc = O(n)
+        getLockedDesc(node, lockedNodes); // O(n)
 
-        if(lockedNodes.empty()) return false;
+        if(lockedNodes.empty()) return false; // O(1)
 
-        for(Node* x : lockedNodes) {
+        for(Node* x : lockedNodes) { //O(N)
             if(x->lockedBy != uid) return false;
         }
 
-        for(Node* x : lockedNodes) {
+        for(Node* x : lockedNodes) { // O(N)
             x->isLocked = false;
             x->lockedBy = -1;
         }
@@ -140,3 +140,22 @@ int main() {
     }
     return 0;
 }
+
+/*
+Given constraints:
+N ≤ 5 x 10^5
+Q ≤ 5 x 10^5
+1 < m < 30
+
+height = logm(n) = log30(10^5) = 13
+
+Overall :
+TC : O(N), SC : O(N)
+
+Why not good?
+Imagine n = 5 X 10^5 and q = 5 X 10^5
+No. of operations = 2.5 X 10^11
+
+Optimization : Since ancestor check if balanced, and descendant check is traversing
+subtree everytime, use something to avoid checks.
+*/
